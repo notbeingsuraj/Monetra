@@ -1,0 +1,10 @@
+{
+  "permission": {
+    "read": {
+      "/Users/surajkumar/Desktop/Monetra/.opencode/get-shit-done/*": "allow"
+    },
+    "external_directory": {
+      "/Users/surajkumar/Desktop/Monetra/.opencode/get-shit-done/*": "allow"
+    }
+  }
+}
