@@ -10,6 +10,10 @@ export interface IUser extends Document {
   trustScore: number;
   profilePicture?: string;
   pushToken?: string;
+  isFlagged?: boolean;
+  isPhoneVerified?: boolean;
+  otp?: string;
+  otpExpiresAt?: Date;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -51,6 +55,22 @@ const userSchema = new Schema<IUser>(
     },
     profilePicture: {
       type: String,
+    },
+    isFlagged: {
+      type: Boolean,
+      default: false,
+    },
+    isPhoneVerified: {
+      type: Boolean,
+      default: false,
+    },
+    otp: {
+      type: String,
+      select: false,
+    },
+    otpExpiresAt: {
+      type: Date,
+      select: false,
     },
   },
   {

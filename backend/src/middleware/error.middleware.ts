@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import * as Sentry from '@sentry/node';
 
 export interface AppError extends Error {
   statusCode?: number;
@@ -16,6 +17,9 @@ export const errorHandler = (
 
   if (process.env.NODE_ENV !== 'production') {
     console.error('[Error]', err.stack);
+  } else {
+    // In production, send to Sentry
+    Sentry.captureException(err);
   }
 
   res.status(statusCode).json({

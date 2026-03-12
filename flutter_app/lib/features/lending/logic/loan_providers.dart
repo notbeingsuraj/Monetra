@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/loan_repository.dart';
 import '../data/loan_models.dart';
 
+
 final loanRepositoryProvider = Provider<LoanRepository>((ref) => const LoanRepository());
 
 // Loans list — keyed by status filter

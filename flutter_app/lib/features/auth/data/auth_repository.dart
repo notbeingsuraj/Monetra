@@ -1,28 +1,32 @@
 import '../../../services/api/api_client.dart';
 import '../../../services/storage/storage_service.dart';
-import 'user_model.dart';
+import '../../../core/models/user_model.dart';
+import 'user_model.dart' as auth_models;
 
 class AuthRepository {
   const AuthRepository();
 
-  Future<AuthTokens> login({String? email, String? phone, required String password}) async {
-    final tokens = await ApiClient.instance.post<AuthTokens>(
+  Future<auth_models.AuthTokens> login({String? email, String? phone, required String password}) async {
+    final tokens = await ApiClient.instance.post<auth_models.AuthTokens>(
       '/auth/login',
       data: {if (email != null) 'email': email, if (phone != null) 'phone': phone, 'password': password},
-      fromJson: AuthTokens.fromJson,
+      fromJson: auth_models.AuthTokens.fromJson,
     );
     await StorageService.instance.setToken(tokens.token);
+    if (tokens.refreshToken != null) {
+      await StorageService.instance.setRefreshToken(tokens.refreshToken!);
+    }
     await StorageService.instance.setUserJson(tokens.user.toJsonString());
     return tokens;
   }
 
-  Future<AuthTokens> register({
+  Future<auth_models.AuthTokens> register({
     required String name,
     String? email,
     String? phone,
     required String password,
   }) async {
-    final tokens = await ApiClient.instance.post<AuthTokens>(
+    final tokens = await ApiClient.instance.post<auth_models.AuthTokens>(
       '/auth/register',
       data: {
         'name': name,
@@ -30,25 +34,28 @@ class AuthRepository {
         if (phone != null) 'phone': phone,
         'password': password,
       },
-      fromJson: AuthTokens.fromJson,
+      fromJson: auth_models.AuthTokens.fromJson,
     );
     await StorageService.instance.setToken(tokens.token);
+    if (tokens.refreshToken != null) {
+      await StorageService.instance.setRefreshToken(tokens.refreshToken!);
+    }
     await StorageService.instance.setUserJson(tokens.user.toJsonString());
     return tokens;
   }
 
-  Future<User> getMe() async {
+  Future<UserModel> getMe() async {
     final data = await ApiClient.instance.get<Map<String, dynamic>>('/auth/me');
-    return User.fromJson(data['user'] as Map<String, dynamic>);
+    return UserModel.fromJson(data['user'] as Map<String, dynamic>);
   }
 
   Future<void> logout() => StorageService.instance.clearAll();
 
-  Future<(String?, User?)> getCachedAuth() async {
+  Future<(String?, UserModel?)> getCachedAuth() async {
     final token = await StorageService.instance.getToken();
     final userJson = await StorageService.instance.getUserJson();
     if (token != null && userJson != null) {
-      return (token, User.fromJsonString(userJson));
+      return (token, auth_models.UserModelExtensions.fromJsonString(userJson));
     }
     return (null, null);
   }

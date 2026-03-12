@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../services/api/api_client.dart';
 import '../data/auth_repository.dart';
-import '../data/user_model.dart';
+import '../../../core/models/user_model.dart';
 
 // Repository provider
 final authRepositoryProvider = Provider<AuthRepository>((ref) => const AuthRepository());
@@ -15,7 +15,7 @@ class AuthState {
     this.isBootstrapping = true,
   });
 
-  final User? user;
+  final UserModel? user;
   final bool isLoading;
   final String? error;
   final bool isBootstrapping;
@@ -23,7 +23,7 @@ class AuthState {
   bool get isAuthenticated => user != null;
 
   AuthState copyWith({
-    User? user,
+    UserModel? user,
     bool? isLoading,
     String? error,
     bool? isBootstrapping,
