@@ -33,11 +33,38 @@ class LoanRepository {
     return LoanSummary.fromJson(data['data'] as Map<String, dynamic>);
   }
 
-  Future<Loan> createLoan(CreateLoanPayload payload) async {
+  Future<Loan> createLoanRequest(CreateLoanPayload payload) async {
     final data = await ApiClient.instance.post<Map<String, dynamic>>(
-      '/loans',
+      '/loans/requests',
       data: payload.toJson(),
     );
+    return Loan.fromJson(data['data'] as Map<String, dynamic>);
+  }
+
+  Future<List<Loan>> getIncomingRequests() async {
+    final data = await ApiClient.instance.get<Map<String, dynamic>>('/loans/requests/incoming');
+    final list = data['data'] as List<dynamic>;
+    return list.map((e) => Loan.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<List<Loan>> getOutgoingRequests() async {
+    final data = await ApiClient.instance.get<Map<String, dynamic>>('/loans/requests/outgoing');
+    final list = data['data'] as List<dynamic>;
+    return list.map((e) => Loan.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<Loan> acceptLoanRequest(String id) async {
+    final data = await ApiClient.instance.post<Map<String, dynamic>>('/loans/requests/$id/accept');
+    return Loan.fromJson(data['data'] as Map<String, dynamic>);
+  }
+
+  Future<Loan> rejectLoanRequest(String id) async {
+    final data = await ApiClient.instance.post<Map<String, dynamic>>('/loans/requests/$id/reject');
+    return Loan.fromJson(data['data'] as Map<String, dynamic>);
+  }
+
+  Future<Loan> cancelLoanRequest(String id) async {
+    final data = await ApiClient.instance.post<Map<String, dynamic>>('/loans/requests/$id/cancel');
     return Loan.fromJson(data['data'] as Map<String, dynamic>);
   }
 

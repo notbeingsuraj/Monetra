@@ -7,6 +7,8 @@ import '../../features/auth/presentation/register_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/transactions/presentation/transactions_screen.dart';
 import '../../features/lending/presentation/add_loan_screen.dart';
+import '../../features/lending/presentation/loan_request_screen.dart';
+import '../../features/lending/presentation/loan_requests_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../constants/app_routes.dart';
 import 'app_shell.dart';
@@ -82,6 +84,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.lend,
         name: 'lend',
         builder: (_, __) => const AddLoanScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.lendRequest,
+        name: 'lend-request',
+        builder: (_, __) => const LoanRequestScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.requests,
+        name: 'requests',
+        builder: (_, __) => const LoanRequestsScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

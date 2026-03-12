@@ -9,11 +9,18 @@ import '../../auth/logic/auth_provider.dart';
 import '../../lending/data/loan_models.dart';
 import '../../lending/logic/loan_providers.dart';
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  int _selectedTab = 0; // 0 for Active Loans, 1 for Requests
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(authProvider).user;
     final summaryAsync = ref.watch(loanSummaryProvider);
     final activeLoansAsync = ref.watch(activeLoansProvider);
@@ -129,6 +136,13 @@ class DashboardScreen extends ConsumerWidget {
                                 onTap: () => context.push(AppRoutes.lend),
                               ),
                             ),
+                            Expanded(
+                              child: _QuickAction(
+                                icon: Icons.send_rounded,
+                                label: 'Request',
+                                onTap: () => context.push(AppRoutes.lendRequest),
+                              ),
+                            ),
                             const SizedBox(width: AppSpacing.md),
                             Expanded(
                               child: _QuickAction(
@@ -169,56 +183,98 @@ class DashboardScreen extends ConsumerWidget {
               ),
 
               // Section header
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, AppSpacing.md),
-                  child: _SectionHeader(title: 'Active Loans', actionLabel: null),
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, AppSpacing.md),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => setState(() => _selectedTab = 0),
+                        child: Text(
+                          'Active Loans',
+                          style: _selectedTab == 0
+                              ? AppTextStyles.headlineSmall
+                              : AppTextStyles.headlineSmall.copyWith(color: AppColors.neutralMid),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.xl),
+                      GestureDetector(
+                        onTap: () => setState(() => _selectedTab = 1),
+                        child: Text(
+                          'Requests',
+                          style: _selectedTab == 1
+                              ? AppTextStyles.headlineSmall
+                              : AppTextStyles.headlineSmall.copyWith(color: AppColors.neutralMid),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
-              // Active loans
-              activeLoansAsync.when(
-                data: (loans) => loans.isEmpty
-                    ? SliverToBoxAdapter(
-                        child: EmptyState(
-                          icon: Icons.handshake_outlined,
-                          title: 'No active loans',
-                          subtitle: 'Loans you create will appear here.',
-                          actionLabel: 'Record a Loan',
-                          onAction: () => context.push(AppRoutes.lend),
-                        ),
-                      )
-                    : SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (ctx, i) => Padding(
-                              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                              child: _LoanRow(loan: loans[i]),
+              // Content based on tab
+              if (_selectedTab == 0)
+                activeLoansAsync.when(
+                  data: (loans) => loans.isEmpty
+                      ? SliverToBoxAdapter(
+                          child: EmptyState(
+                            icon: Icons.handshake_outlined,
+                            title: 'No active loans',
+                            subtitle: 'Loans you create will appear here.',
+                            actionLabel: 'Record a Loan',
+                            onAction: () => context.push(AppRoutes.lend),
+                          ),
+                        )
+                      : SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (ctx, i) => Padding(
+                                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                                child: _LoanRow(loan: loans[i]),
+                              ),
+                              childCount: loans.length,
                             ),
-                            childCount: loans.length,
                           ),
                         ),
+                  loading: () => SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (_, __) => const Padding(
+                          padding: EdgeInsets.only(bottom: AppSpacing.md),
+                          child: LoanCardSkeleton(),
+                        ),
+                        childCount: 3,
                       ),
-                loading: () => SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (_, __) => const Padding(
-                        padding: EdgeInsets.only(bottom: AppSpacing.md),
-                        child: LoanCardSkeleton(),
-                      ),
-                      childCount: 3,
+                    ),
+                  ),
+                  error: (e, _) => SliverToBoxAdapter(
+                    child: ErrorState(
+                      message: 'Could not load loans.',
+                      onRetry: () => ref.invalidate(activeLoansProvider),
+                    ),
+                  ),
+                )
+              else
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.xl),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Manage requests to and from you.',
+                            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.neutralMid)),
+                        const SizedBox(height: AppSpacing.xl),
+                        AppButton(
+                          label: 'View All Requests',
+                          onPressed: () => context.push(AppRoutes.requests),
+                          variant: AppButtonVariant.primary,
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                error: (e, _) => SliverToBoxAdapter(
-                  child: ErrorState(
-                    message: 'Could not load loans.',
-                    onRetry: () => ref.invalidate(activeLoansProvider),
-                  ),
-                ),
-              ),
 
               const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.huge)),
             ],

@@ -1,29 +1,29 @@
-enum LoanStatus { pending, repaid, overdue, defaulted }
+enum LoanStatus { pending, active, rejected, repaid, overdue, defaulted, cancelled, expired }
 
 extension LoanStatusX on LoanStatus {
   String get label {
     switch (this) {
-      case LoanStatus.pending:
-        return 'Pending';
-      case LoanStatus.repaid:
-        return 'Repaid';
-      case LoanStatus.overdue:
-        return 'Overdue';
-      case LoanStatus.defaulted:
-        return 'Defaulted';
+      case LoanStatus.pending: return 'Pending';
+      case LoanStatus.active: return 'Active';
+      case LoanStatus.rejected: return 'Rejected';
+      case LoanStatus.repaid: return 'Repaid';
+      case LoanStatus.overdue: return 'Overdue';
+      case LoanStatus.defaulted: return 'Defaulted';
+      case LoanStatus.cancelled: return 'Cancelled';
+      case LoanStatus.expired: return 'Expired';
     }
   }
 
   static LoanStatus fromString(String s) {
     switch (s.toLowerCase()) {
-      case 'repaid':
-        return LoanStatus.repaid;
-      case 'overdue':
-        return LoanStatus.overdue;
-      case 'defaulted':
-        return LoanStatus.defaulted;
-      default:
-        return LoanStatus.pending;
+      case 'active': return LoanStatus.active;
+      case 'rejected': return LoanStatus.rejected;
+      case 'repaid': return LoanStatus.repaid;
+      case 'overdue': return LoanStatus.overdue;
+      case 'defaulted': return LoanStatus.defaulted;
+      case 'cancelled': return LoanStatus.cancelled;
+      case 'expired': return LoanStatus.expired;
+      default: return LoanStatus.pending;
     }
   }
 }
@@ -36,10 +36,12 @@ class Loan {
     this.borrowerContact,
     this.borrowerId,
     required this.amount,
+    this.interest,
     required this.currency,
     required this.dueDate,
     this.note,
     required this.status,
+    this.expiresAt,
     this.repaidAt,
     required this.lateDays,
     required this.createdAt,
@@ -52,10 +54,12 @@ class Loan {
   final String? borrowerContact;
   final String? borrowerId;
   final double amount;
+  final double? interest;
   final String currency;
   final DateTime dueDate;
   final String? note;
   final LoanStatus status;
+  final DateTime? expiresAt;
   final DateTime? repaidAt;
   final int lateDays;
   final DateTime createdAt;
@@ -68,10 +72,12 @@ class Loan {
         borrowerContact: j['borrowerContact'] as String?,
         borrowerId: j['borrowerId'] as String?,
         amount: (j['amount'] as num).toDouble(),
+        interest: j['interest'] != null ? (j['interest'] as num).toDouble() : null,
         currency: (j['currency'] as String?) ?? 'INR',
         dueDate: DateTime.parse(j['dueDate'] as String),
         note: j['note'] as String?,
         status: LoanStatusX.fromString(j['status'] as String),
+        expiresAt: j['expiresAt'] != null ? DateTime.parse(j['expiresAt'] as String) : null,
         repaidAt: j['repaidAt'] != null ? DateTime.parse(j['repaidAt'] as String) : null,
         lateDays: (j['lateDays'] as num).toInt(),
         createdAt: DateTime.parse(j['createdAt'] as String),
@@ -159,6 +165,7 @@ class CreateLoanPayload {
     required this.borrowerName,
     this.borrowerContact,
     required this.amount,
+    this.interest,
     this.currency = 'INR',
     required this.dueDate,
     this.note,
@@ -167,14 +174,16 @@ class CreateLoanPayload {
   final String borrowerName;
   final String? borrowerContact;
   final double amount;
+  final double? interest;
   final String currency;
   final String dueDate;
   final String? note;
 
   Map<String, dynamic> toJson() => {
-        'borrowerName': borrowerName,
+        if (borrowerName.isNotEmpty) 'borrowerName': borrowerName,
         if (borrowerContact != null) 'borrowerContact': borrowerContact,
         'amount': amount,
+        if (interest != null) 'interest': interest,
         'currency': currency,
         'dueDate': dueDate,
         if (note != null) 'note': note,

@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export type LoanStatus = 'pending' | 'repaid' | 'overdue' | 'defaulted';
+export type LoanStatus = 'pending' | 'active' | 'rejected' | 'repaid' | 'overdue' | 'defaulted' | 'cancelled' | 'expired';
 
 export interface ILoan extends Document {
   _id: mongoose.Types.ObjectId;
@@ -9,10 +9,12 @@ export interface ILoan extends Document {
   borrowerContact?: string;
   borrowerId?: mongoose.Types.ObjectId;
   amount: number;
+  interest?: number;
   currency: string;
   dueDate: Date;
   note?: string;
   status: LoanStatus;
+  expiresAt?: Date;
   repaidAt?: Date;
   lateDays: number;
   createdAt: Date;
@@ -47,6 +49,12 @@ const loanSchema = new Schema<ILoan>(
       required: [true, 'Loan amount is required'],
       min: [0.01, 'Amount must be greater than 0'],
     },
+    interest: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100,
+    },
     currency: {
       type: String,
       default: 'INR',
@@ -64,8 +72,12 @@ const loanSchema = new Schema<ILoan>(
     },
     status: {
       type: String,
-      enum: ['pending', 'repaid', 'overdue', 'defaulted'],
+      enum: ['pending', 'active', 'rejected', 'repaid', 'overdue', 'defaulted', 'cancelled', 'expired'],
       default: 'pending',
+    },
+    expiresAt: {
+      type: Date,
+      default: null,
     },
     repaidAt: {
       type: Date,
@@ -84,7 +96,12 @@ const loanSchema = new Schema<ILoan>(
 
 // Calculate overdue status automatically
 loanSchema.virtual('isOverdue').get(function () {
-  return this.status === 'pending' && new Date() > this.dueDate;
+  return this.status === 'active' && new Date() > this.dueDate;
+});
+
+// Calculate expired status automatically
+loanSchema.virtual('isExpired').get(function () {
+  return this.status === 'pending' && this.expiresAt && new Date() > this.expiresAt;
 });
 
 loanSchema.index({ lenderId: 1, status: 1 });

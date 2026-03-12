@@ -8,7 +8,9 @@ class AppRoutes {
   static const String dashboard = '/dashboard';
   static const String transactions = '/transactions';
   static const String lend = '/lend';
+  static const String lendRequest = '/lend-request';
   static const String borrow = '/borrow';
+  static const String requests = '/requests';
   static const String loanDetail = '/loans/:id';
   static const String profile = '/profile';
 

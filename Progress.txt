@@ -1,0 +1,51 @@
+Monetra Development Progress
+
+Project Start Date:
+
+Status: Not Started
+
+---
+
+Setup
+[ ] Project initialized
+[ ] Navigation configured
+[ ] Folder structure ready
+
+---
+
+Authentication
+[ ] Login screen
+[ ] Signup screen
+[ ] JWT backend
+
+---
+
+Loan System
+[ ] Loan model
+[ ] Create loan API
+[ ] Loan UI
+
+---
+
+Dashboard
+[ ] Trust score
+[ ] Loan summary
+[ ] UI polish
+
+---
+
+Trust Score Engine
+[ ] Algorithm implemented
+[ ] Score updates
+
+---
+
+Notifications
+[ ] Due reminders
+[ ] Overdue alerts
+
+---
+
+MVP Completion
+[ ] Android build
+[ ] User testing
